@@ -174,8 +174,8 @@ export function PCBViewer3D({ meta, cpl, selectedDesignator, solderMaskColor }: 
         </button>
       </div>
 
-      <div className="flex-1 min-h-0 bg-slate-900">
-        <Canvas camera={{ position: [0, 3, 3], fov: 45 }}>
+      <div className="flex-1 min-h-0 bg-slate-200">
+        <Canvas camera={{ position: [0, 3, 3], fov: 45 }} gl={{ alpha: false }} onCreated={({ gl }) => gl.setClearColor('#e2e8f0')}>
           <ambientLight intensity={0.6} />
           <directionalLight position={[5, 5, 5]} intensity={1} />
           <Board meta={meta} solderMaskColor={solderMaskColor} showBottom={showBottom} />
