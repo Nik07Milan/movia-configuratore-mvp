@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { calculatePrice } from './priceCalculator'
-import type { PCBConfig, AssemblyConfig, BOMItem, CPLItem } from '../types/order'
+import type { PCBConfig, AssemblyConfig, BOMItem } from '../types/order'
 
 const basePCB: PCBConfig = {
   material: 'FR4', layers: 2, width: 100, height: 100,

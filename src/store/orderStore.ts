@@ -72,7 +72,7 @@ interface OrderStore {
 
 export const useOrderStore = create<OrderStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       currentStep: 1,
       gerberFiles: [],
       gerberMeta: null,

@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
-  plugins: [react(), nodePolyfills()],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  plugins: [react(), nodePolyfills() as any],
   test: {
     environment: 'jsdom',
     globals: true,

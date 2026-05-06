@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useOrderStore } from './orderStore'
-import type { BOMItem, CPLItem } from '../types/order'
+import type { BOMItem } from '../types/order'
 
-const { getState, setState } = useOrderStore
+const { getState } = useOrderStore
 
 beforeEach(() => {
   getState().reset()
@@ -19,12 +19,12 @@ describe('orderStore', () => {
   })
 
   it('setGerberMeta updates meta', () => {
-    getState().setGerberMeta({ layers: 6, width: 100, height: 80, layerSVGs: { top: '<svg/>', bottom: '<svg/>' } })
+    getState().setGerberMeta({ layers: 6, width: 100, height: 80, originX: 0, originY: 0, layerSVGs: { top: '<svg/>', bottom: '<svg/>' } })
     expect(getState().gerberMeta?.layers).toBe(6)
   })
 
   it('setPCBConfig pre-fills from gerberMeta', () => {
-    getState().setGerberMeta({ layers: 2, width: 50, height: 40, layerSVGs: { top: '', bottom: '' } })
+    getState().setGerberMeta({ layers: 2, width: 50, height: 40, originX: 0, originY: 0, layerSVGs: { top: '', bottom: '' } })
     const config = getState().pcbConfig
     expect(config.layers).toBe(2)
     expect(config.width).toBe(50)
