@@ -1,0 +1,149 @@
+<h2>Layout del wizard — come vuoi navigare gli step?</h2>
+<p class="subtitle">Il configuratore PCBA ha ~6 step (Gerber → PCB config → Assembly → BOM/CPL → Review parti → Quote). Come li organizziamo?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px; background:#0f172a; border-radius:6px;">
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+        <!-- Sidebar steps -->
+        <div style="width:140px; background:#1e293b; border-radius:6px; padding:10px; flex-shrink:0;">
+          <div style="font-size:10px; color:#64748b; margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Steps</div>
+          <div style="padding:6px 8px; background:#3b82f6; border-radius:4px; color:#fff; font-size:11px; margin-bottom:4px;">① Gerber Upload</div>
+          <div style="padding:6px 8px; color:#94a3b8; font-size:11px; margin-bottom:4px;">② PCB Config</div>
+          <div style="padding:6px 8px; color:#94a3b8; font-size:11px; margin-bottom:4px;">③ Assembly</div>
+          <div style="padding:6px 8px; color:#94a3b8; font-size:11px; margin-bottom:4px;">④ BOM / CPL</div>
+          <div style="padding:6px 8px; color:#94a3b8; font-size:11px; margin-bottom:4px;">⑤ Review parti</div>
+          <div style="padding:6px 8px; color:#94a3b8; font-size:11px;">⑥ Quote</div>
+        </div>
+        <!-- Main content -->
+        <div style="flex:1;">
+          <div style="background:#1e293b; border-radius:6px; padding:12px; margin-bottom:8px;">
+            <div style="color:#94a3b8; font-size:10px; margin-bottom:6px;">STEP 1 — GERBER FILES</div>
+            <div style="border:2px dashed #334155; border-radius:6px; padding:20px; text-align:center; color:#475569; font-size:11px;">
+              📁 Trascina il tuo ZIP gerber qui
+            </div>
+          </div>
+          <!-- Price panel -->
+          <div style="background:#1e293b; border-radius:6px; padding:10px;">
+            <div style="color:#64748b; font-size:10px; margin-bottom:4px;">PREZZO STIMATO</div>
+            <div style="color:#22c55e; font-size:18px; font-weight:700;">€ --</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Sidebar verticale</h3>
+      <p>Step list fissa a sinistra, contenuto a destra, price panel in basso. Click libero sugli step completati. Stile "tool professionale".</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px; background:#0f172a; border-radius:6px;">
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <!-- Top stepper -->
+        <div style="display:flex; align-items:center; justify-content:center; gap:0; background:#1e293b; border-radius:6px; padding:10px;">
+          <div style="display:flex; align-items:center; gap:4px; font-size:10px;">
+            <div style="width:22px;height:22px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:10px;">1</div>
+            <span style="color:#3b82f6;">Gerber</span>
+          </div>
+          <div style="width:24px;height:2px;background:#334155;margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;">
+            <div style="width:22px;height:22px;background:#334155;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:10px;">2</div>
+            <span style="color:#475569;">PCB</span>
+          </div>
+          <div style="width:24px;height:2px;background:#334155;margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;">
+            <div style="width:22px;height:22px;background:#334155;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:10px;">3</div>
+            <span style="color:#475569;">Assembly</span>
+          </div>
+          <div style="width:24px;height:2px;background:#334155;margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;">
+            <div style="width:22px;height:22px;background:#334155;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:10px;">4</div>
+            <span style="color:#475569;">BOM</span>
+          </div>
+          <div style="width:24px;height:2px;background:#334155;margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;">
+            <div style="width:22px;height:22px;background:#334155;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:10px;">5</div>
+            <span style="color:#475569;">Review</span>
+          </div>
+          <div style="width:24px;height:2px;background:#334155;margin:0 4px;"></div>
+          <div style="display:flex;align-items:center;gap:4px;font-size:10px;">
+            <div style="width:22px;height:22px;background:#334155;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:10px;">6</div>
+            <span style="color:#475569;">Quote</span>
+          </div>
+        </div>
+        <!-- Content + price -->
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1; background:#1e293b; border-radius:6px; padding:14px;">
+            <div style="color:#94a3b8; font-size:10px; margin-bottom:8px;">STEP 1 — GERBER FILES</div>
+            <div style="border:2px dashed #334155; border-radius:6px; padding:20px; text-align:center; color:#475569; font-size:11px;">
+              📁 Trascina il tuo ZIP gerber qui
+            </div>
+          </div>
+          <div style="width:100px; background:#1e293b; border-radius:6px; padding:10px;">
+            <div style="color:#64748b; font-size:9px; margin-bottom:4px;">PREZZO</div>
+            <div style="color:#22c55e; font-size:16px; font-weight:700;">€ --</div>
+            <div style="color:#475569; font-size:9px; margin-top:8px;">PCB: —</div>
+            <div style="color:#475569; font-size:9px;">PCBA: —</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Stepper orizzontale top</h3>
+      <p>Progress bar in cima, contenuto al centro, price sidebar a destra compatta. Classico wizard e-commerce. Più familiare per utenti non tecnici.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px; background:#0f172a; border-radius:6px;">
+      <div style="display:flex; gap:10px;">
+        <!-- Main 2/3 -->
+        <div style="flex:2; display:flex; flex-direction:column; gap:8px;">
+          <div style="background:#1e293b; border-radius:6px; padding:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="color:#94a3b8; font-size:10px;">STEP 1 / 6 — GERBER</span>
+              <div style="display:flex;gap:4px;">
+                <div style="width:8px;height:8px;background:#3b82f6;border-radius:50%;"></div>
+                <div style="width:8px;height:8px;background:#334155;border-radius:50%;"></div>
+                <div style="width:8px;height:8px;background:#334155;border-radius:50%;"></div>
+                <div style="width:8px;height:8px;background:#334155;border-radius:50%;"></div>
+                <div style="width:8px;height:8px;background:#334155;border-radius:50%;"></div>
+                <div style="width:8px;height:8px;background:#334155;border-radius:50%;"></div>
+              </div>
+            </div>
+            <div style="border:2px dashed #334155; border-radius:6px; padding:16px; text-align:center; color:#475569; font-size:11px;">
+              📁 Trascina il tuo ZIP gerber qui
+            </div>
+          </div>
+          <!-- 3D preview placeholder -->
+          <div style="background:#1e293b; border-radius:6px; padding:10px; text-align:center;">
+            <div style="color:#475569; font-size:10px; margin-bottom:4px;">3D PREVIEW</div>
+            <div style="background:#0f172a; border-radius:4px; height:60px; display:flex; align-items:center; justify-content:center; color:#334155; font-size:10px;">
+              [ Three.js viewer ]
+            </div>
+          </div>
+        </div>
+        <!-- Price right panel -->
+        <div style="flex:1; background:#1e293b; border-radius:6px; padding:10px;">
+          <div style="color:#64748b; font-size:9px; margin-bottom:8px; text-transform:uppercase;">Riepilogo</div>
+          <div style="color:#22c55e; font-size:20px; font-weight:700; margin-bottom:8px;">€ --</div>
+          <div style="border-top:1px solid #334155; padding-top:8px;">
+            <div style="color:#475569; font-size:9px;">PCB: —</div>
+            <div style="color:#475569; font-size:9px;">Assembly: —</div>
+            <div style="color:#475569; font-size:9px;">Componenti: —</div>
+          </div>
+          <div style="margin-top:10px; background:#3b82f6; border-radius:4px; padding:6px; text-align:center; color:#fff; font-size:10px; cursor:pointer;">
+            Salva preventivo
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Layout ibrido + 3D integrato</h3>
+      <p>Step progress compatto in-card, 3D preview sempre visibile nel main panel, price summary persistente a destra. Più "app" che wizard. Desktop-first.</p>
+    </div>
+  </div>
+
+</div>

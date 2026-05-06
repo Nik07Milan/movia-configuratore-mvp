@@ -1,0 +1,44 @@
+<h2>3 approcci architetturali</h2>
+<p class="subtitle">Come strutturiamo il progetto? Considera complessità, manutenibilità e velocità di sviluppo MVP.</p>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Vite + React + tutto in-house</h3>
+      <p>Stack puro: React Router per gli step, Context API o Zustand per lo stato, nessun meta-framework. Massimo controllo, zero magia nascosta. Build statica deployabile ovunque (Netlify, S3, nginx).</p>
+      <div class="pros-cons" style="margin-top:10px;">
+        <div class="pros"><h4>Pro</h4><ul><li>Semplicissimo da capire e modificare</li><li>Bundle piccolo</li><li>Deploy triviale</li><li>Nessun lock-in</li></ul></div>
+        <div class="cons"><h4>Contro</h4><ul><li>Routing manuale degli step</li><li>SSR non disponibile (non serve per MVP)</li></ul></div>
+      </div>
+      <p style="margin-top:8px;color:#6366f1;font-weight:600;">⭐ Raccomandato per MVP</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Next.js App Router</h3>
+      <p>Meta-framework full-stack. Ogni step come route `/configuratore/[step]`. Server Components per dati, Client Components per interattività. Pronto per integrare backend Movia in futuro con Server Actions o API Routes.</p>
+      <div class="pros-cons" style="margin-top:10px;">
+        <div class="pros"><h4>Pro</h4><ul><li>Route-based step navigation (URL shareable)</li><li>Facile aggiungere API routes mock</li><li>Upgrade path naturale verso backend reale</li></ul></div>
+        <div class="cons"><h4>Contro</h4><ul><li>Più complessità per MVP puro frontend</li><li>Attenzione client/server boundary con Three.js</li><li>Build più lenta</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Vite + React + MSW (Mock Service Worker)</h3>
+      <p>Come A ma con MSW per simulare le API Movia in modo realistico (intercetta fetch nel browser). Ogni chiamata API è già cablata — quando il backend è pronto, si disabilita MSW e funziona tutto.</p>
+      <div class="pros-cons" style="margin-top:10px;">
+        <div class="pros"><h4>Pro</h4><ul><li>API mock realistiche (non hardcoded)</li><li>Transizione backend reale senza refactor</li><li>Dev experience identica a produzione</li></ul></div>
+        <div class="cons"><h4>Contro</h4><ul><li>Setup MSW leggermente più complesso</li><li>Service worker richiede HTTPS in alcuni contesti</li></ul></div>
+      </div>
+      <p style="margin-top:8px;color:#6366f1;font-weight:600;">⭐ Alternativa valida se backend Movia è imminente</p>
+    </div>
+  </div>
+
+</div>

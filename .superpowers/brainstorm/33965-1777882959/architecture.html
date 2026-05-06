@@ -1,0 +1,112 @@
+<h2>Architettura — Sezione 1/3</h2>
+<p class="subtitle">Struttura componenti, stato globale e flusso dati. Vite + React + TypeScript.</p>
+
+<div class="section">
+  <h3>Struttura cartelle</h3>
+  <div style="background:#1e293b;border-radius:8px;padding:20px;font-family:monospace;font-size:12px;color:#94a3b8;line-height:1.8;">
+    <span style="color:#64748b;">src/</span><br>
+    &nbsp;&nbsp;<span style="color:#7dd3fc;">steps/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">Step1_GerberUpload.tsx</span>&nbsp;&nbsp;<span style="color:#475569;">← drag&drop ZIP + parse gerber</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">Step2_PCBConfig.tsx</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← form opzioni scheda</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">Step3_Assembly.tsx</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← toggle PCBA + opzioni</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">Step4_BOMUpload.tsx</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← upload BOM + CPL</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">Step5_PartsReview.tsx</span>&nbsp;&nbsp;<span style="color:#475569;">← tabella componenti</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">Step6_Quote.tsx</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← price breakdown + checkout</span><br>
+    &nbsp;&nbsp;<span style="color:#7dd3fc;">components/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">Layout.tsx</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← shell: sidebar + main + price panel</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">StepSidebar.tsx</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← nav step verticale</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">PricePanel.tsx</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← breakdown prezzo real-time</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">FileDropzone.tsx</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← drag&drop riusabile</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">PCBViewer3D.tsx</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← Three.js viewer (R3F)</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">BOMTable.tsx</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← tabella review parti</span><br>
+    &nbsp;&nbsp;<span style="color:#7dd3fc;">store/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">orderStore.ts</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← Zustand — stato globale ordine</span><br>
+    &nbsp;&nbsp;<span style="color:#7dd3fc;">lib/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">gerberParser.ts</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← @tracespace wrapper</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">bomParser.ts</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← CSV/XLSX → struttura interna</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">priceCalculator.ts</span>&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← formula mock prezzo</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">api.ts</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← layer API (mock → Movia ready)</span><br>
+    &nbsp;&nbsp;<span style="color:#7dd3fc;">types/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a3e635;">order.ts</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#475569;">← tipi TypeScript condivisi</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Flusso dati</h3>
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px;text-align:center;min-width:100px;">
+      <div style="font-size:18px;margin-bottom:4px;">📁</div>
+      <div style="font-size:11px;color:#0369a1;font-weight:600;">File utente</div>
+      <div style="font-size:10px;color:#64748b;">ZIP / CSV / XLSX</div>
+    </div>
+
+    <div style="color:#94a3b8;font-size:20px;">→</div>
+
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;text-align:center;min-width:100px;">
+      <div style="font-size:18px;margin-bottom:4px;">⚙️</div>
+      <div style="font-size:11px;color:#166534;font-weight:600;">lib/parsers</div>
+      <div style="font-size:10px;color:#64748b;">gerber / bom / pnp</div>
+    </div>
+
+    <div style="color:#94a3b8;font-size:20px;">→</div>
+
+    <div style="background:#faf5ff;border:1px solid #d8b4fe;border-radius:8px;padding:12px;text-align:center;min-width:100px;">
+      <div style="font-size:18px;margin-bottom:4px;">🗃️</div>
+      <div style="font-size:11px;color:#6b21a8;font-weight:600;">Zustand store</div>
+      <div style="font-size:10px;color:#64748b;">orderStore.ts</div>
+    </div>
+
+    <div style="color:#94a3b8;font-size:20px;">→</div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:8px;text-align:center;min-width:100px;">
+        <div style="font-size:10px;color:#c2410c;font-weight:600;">🎮 Step components</div>
+        <div style="font-size:10px;color:#64748b;">form + config</div>
+      </div>
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:8px;text-align:center;min-width:100px;">
+        <div style="font-size:10px;color:#c2410c;font-weight:600;">🧊 PCBViewer3D</div>
+        <div style="font-size:10px;color:#64748b;">Three.js / R3F</div>
+      </div>
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:8px;text-align:center;min-width:100px;">
+        <div style="font-size:10px;color:#c2410c;font-weight:600;">💰 PricePanel</div>
+        <div style="font-size:10px;color:#64748b;">formula mock</div>
+      </div>
+    </div>
+
+    <div style="color:#94a3b8;font-size:20px;">→</div>
+
+    <div style="background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;padding:12px;text-align:center;min-width:100px;">
+      <div style="font-size:18px;margin-bottom:4px;">🌐</div>
+      <div style="font-size:11px;color:#475569;font-weight:600;">api.ts</div>
+      <div style="font-size:10px;color:#64748b;">mock → Movia API</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <h3>Stato globale (Zustand — orderStore)</h3>
+  <div style="background:#1e293b;border-radius:8px;padding:16px;font-family:monospace;font-size:11px;color:#94a3b8;line-height:1.7;">
+    <span style="color:#7dd3fc;">interface</span> <span style="color:#a3e635;">OrderState</span> {<br>
+    &nbsp;&nbsp;<span style="color:#7dd3fc;">// Step 1</span><br>
+    &nbsp;&nbsp;gerberFiles: <span style="color:#fb923c;">File[]</span><br>
+    &nbsp;&nbsp;gerberMeta: <span style="color:#fb923c;">{ layers, width, height, layerSVGs }</span><br>
+    &nbsp;&nbsp;<span style="color:#7dd3fc;">// Step 2</span><br>
+    &nbsp;&nbsp;pcbConfig: <span style="color:#fb923c;">{ material, layers, qty, productType, ... }</span><br>
+    &nbsp;&nbsp;<span style="color:#7dd3fc;">// Step 3</span><br>
+    &nbsp;&nbsp;assemblyEnabled: <span style="color:#fb923c;">boolean</span><br>
+    &nbsp;&nbsp;assemblyConfig: <span style="color:#fb923c;">{ type, side, qty, toolingHoles, ... }</span><br>
+    &nbsp;&nbsp;<span style="color:#7dd3fc;">// Step 4</span><br>
+    &nbsp;&nbsp;bomFile: <span style="color:#fb923c;">File | null</span><br>
+    &nbsp;&nbsp;cplFile: <span style="color:#fb923c;">File | null</span><br>
+    &nbsp;&nbsp;bomParsed: <span style="color:#fb923c;">BOMItem[]</span><br>
+    &nbsp;&nbsp;cplParsed: <span style="color:#fb923c;">CPLItem[]</span><br>
+    &nbsp;&nbsp;<span style="color:#7dd3fc;">// Calcolato</span><br>
+    &nbsp;&nbsp;priceBreakdown: <span style="color:#fb923c;">PriceBreakdown</span><br>
+    &nbsp;&nbsp;currentStep: <span style="color:#fb923c;">1 | 2 | 3 | 4 | 5 | 6</span><br>
+    }
+  </div>
+</div>
+
+<p style="margin-top:16px;color:#6366f1;font-weight:600;text-align:center;">✓ Questa architettura ti convince? Rispondi nel terminale.</p>

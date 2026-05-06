@@ -1,0 +1,94 @@
+<h2>Prezzo + API Layer — Sezione 3/3</h2>
+<p class="subtitle">Formula mock pricing, contratto API Movia, error handling, persistenza draft.</p>
+
+<div class="section">
+  <h3>Formula mock prezzo (priceCalculator.ts)</h3>
+  <div style="background:#1e293b;border-radius:8px;padding:16px;font-family:monospace;font-size:11px;color:#94a3b8;line-height:1.9;">
+    <span style="color:#64748b;">// PCB base cost</span><br>
+    <span style="color:#a3e635;">pcbBase</span> = (width_mm × height_mm / 1000) × layerMultiplier × materialMultiplier<br>
+    <span style="color:#a3e635;">layerMultiplier</span>: { 1:1.0, 2:1.2, 4:2.1, 6:3.5, 8:5.0 }<br>
+    <span style="color:#a3e635;">materialMultiplier</span>: { FR4:1.0, Flex:2.5, Aluminum:1.8 }<br>
+    <br>
+    <span style="color:#64748b;">// Engineering fee fisso</span><br>
+    <span style="color:#a3e635;">engineeringFee</span> = 3.38<br>
+    <br>
+    <span style="color:#64748b;">// Qty scaling (economie di scala)</span><br>
+    <span style="color:#a3e635;">qtyFactor</span> = qty ≤ 5 ? 1.0 : qty ≤ 10 ? 0.85 : qty ≤ 50 ? 0.7 : 0.55<br>
+    <br>
+    <span style="color:#64748b;">// PCBA (se assembly attivo)</span><br>
+    <span style="color:#a3e635;">setupFee</span> = type==='Economic' ? 6.76 : 15.00<br>
+    <span style="color:#a3e635;">stencilFee</span> = side==='Both' ? 2.54 : 1.27<br>
+    <span style="color:#a3e635;">componentFee</span> = bomItems.filter(dnp=false).length × 0.08<br>
+    <span style="color:#a3e635;">smtFee</span> = cplItems.length × 0.004<br>
+    <br>
+    <span style="color:#64748b;">// Totale</span><br>
+    <span style="color:#7dd3fc;">total</span> = (pcbBase + engineeringFee) × qtyFactor + setupFee + stencilFee + componentFee + smtFee
+  </div>
+</div>
+
+<div class="section">
+  <h3>API Layer (api.ts) — contratto Movia-ready</h3>
+  <div style="background:#1e293b;border-radius:8px;padding:16px;font-family:monospace;font-size:11px;color:#94a3b8;line-height:1.9;">
+    <span style="color:#64748b;">// Oggi: mock locale. Domani: basta cambiare BASE_URL</span><br>
+    <br>
+    <span style="color:#7dd3fc;">GET</span>  <span style="color:#a3e635;">/api/configuratore/prodotti</span><br>
+    &nbsp;&nbsp;→ lista materiali, finiture, opzioni disponibili<br>
+    <br>
+    <span style="color:#7dd3fc;">POST</span> <span style="color:#a3e635;">/api/configuratore/calcola-prezzo</span><br>
+    &nbsp;&nbsp;body: { pcbConfig, assemblyConfig, bomItems }<br>
+    &nbsp;&nbsp;→ { breakdown: PriceBreakdown, buildTime: string }<br>
+    <br>
+    <span style="color:#7dd3fc;">POST</span> <span style="color:#a3e635;">/api/configuratore/salva-configurazione</span><br>
+    &nbsp;&nbsp;body: OrderState (senza File binari)<br>
+    &nbsp;&nbsp;→ { id: string, pdfUrl: string }<br>
+    <br>
+    <span style="color:#7dd3fc;">POST</span> <span style="color:#a3e635;">/api/configuratore/richiedi-ordine</span><br>
+    &nbsp;&nbsp;body: { configId, contatto: { nome, email, azienda } }<br>
+    &nbsp;&nbsp;→ { success: boolean, ticketId: string }
+  </div>
+</div>
+
+<div class="section">
+  <h3>Error handling & UX</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:11px;">
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:10px;">
+      <div style="color:#dc2626;font-weight:600;margin-bottom:6px;">ZIP gerber non valido</div>
+      <div style="color:#475569;">Toast errore + highlight zona drop. Lista file rilevati mostrata. Richiede ≥1 .GTL.</div>
+    </div>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:10px;">
+      <div style="color:#dc2626;font-weight:600;margin-bottom:6px;">BOM/CPL formato errato</div>
+      <div style="color:#475569;">Preview prime 3 righe + messaggio "colonna X non trovata". Suggerimento formato atteso.</div>
+    </div>
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:10px;">
+      <div style="color:#d97706;font-weight:600;margin-bottom:6px;">Componenti DNP</div>
+      <div style="color:#475569;">Badge giallo "DNP" su riga. Non contati nel prezzo assembly. Tooltip spiegazione.</div>
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:10px;">
+      <div style="color:#16a34a;font-weight:600;margin-bottom:6px;">Draft auto-save</div>
+      <div style="color:#475569;">localStorage ogni cambio di step. Banner "Bozza ripristinata" al reload. Pulsante "Nuova configurazione" per reset.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Stack completo confermato</h3>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:11px;">
+    <span style="background:#e0e7ff;color:#4338ca;padding:4px 10px;border-radius:20px;font-weight:600;">Vite 5</span>
+    <span style="background:#e0e7ff;color:#4338ca;padding:4px 10px;border-radius:20px;font-weight:600;">React 18</span>
+    <span style="background:#e0e7ff;color:#4338ca;padding:4px 10px;border-radius:20px;font-weight:600;">TypeScript 5</span>
+    <span style="background:#e0e7ff;color:#4338ca;padding:4px 10px;border-radius:20px;font-weight:600;">Tailwind CSS 3</span>
+    <span style="background:#e0e7ff;color:#4338ca;padding:4px 10px;border-radius:20px;font-weight:600;">Zustand 4</span>
+    <span style="background:#e0e7ff;color:#4338ca;padding:4px 10px;border-radius:20px;font-weight:600;">React Hook Form</span>
+    <span style="background:#fce7f3;color:#9d174d;padding:4px 10px;border-radius:20px;font-weight:600;">Three.js r165</span>
+    <span style="background:#fce7f3;color:#9d174d;padding:4px 10px;border-radius:20px;font-weight:600;">@react-three/fiber 8</span>
+    <span style="background:#fce7f3;color:#9d174d;padding:4px 10px;border-radius:20px;font-weight:600;">@react-three/drei 9</span>
+    <span style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:20px;font-weight:600;">@tracespace/render</span>
+    <span style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:20px;font-weight:600;">xlsx (SheetJS)</span>
+    <span style="background:#d1fae5;color:#065f46;padding:4px 10px;border-radius:20px;font-weight:600;">papaparse</span>
+    <span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:20px;font-weight:600;">react-dropzone</span>
+    <span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:20px;font-weight:600;">react-hot-toast</span>
+    <span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:20px;font-weight:600;">jszip</span>
+  </div>
+</div>
+
+<p style="margin-top:16px;color:#6366f1;font-weight:600;text-align:center;">✓ Tutto ok? Approva nel terminale → scrivo il design doc completo.</p>

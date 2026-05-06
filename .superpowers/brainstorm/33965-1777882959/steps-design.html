@@ -1,0 +1,116 @@
+<h2>Step del Wizard — Sezione 2/3</h2>
+<p class="subtitle">Dettaglio di ogni step: input, output, validazione, comportamento 3D viewer.</p>
+
+<div class="section">
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+    <!-- Step 1 -->
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:28px;height:28px;background:#6366f1;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;">1</div>
+        <span style="font-weight:600;color:#1e293b;">Gerber Upload</span>
+      </div>
+      <div style="font-size:11px;color:#475569;line-height:1.7;">
+        <b>Input:</b> ZIP drag&drop<br>
+        <b>Parser:</b> @tracespace/render → SVG top/bottom + board outline<br>
+        <b>Auto-detect:</b> n° layer da filename (G1-G4), dimensioni da outline<br>
+        <b>Output store:</b> gerberFiles, gerberMeta<br>
+        <b>3D:</b> PCBViewer3D appare con board verde, texture top layer<br>
+        <b>Validazione:</b> ZIP deve contenere ≥1 file .GTL
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:28px;height:28px;background:#6366f1;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;">2</div>
+        <span style="font-weight:600;color:#1e293b;">PCB Config</span>
+      </div>
+      <div style="font-size:11px;color:#475569;line-height:1.7;">
+        <b>Campi:</b> Materiale base, Layer count, Dimensioni (pre-fill), Qty, Tipo prodotto<br>
+        <b>Spec avanzate:</b> Spessore, Finitura superficiale, Colore solder mask, Colore silkscreen<br>
+        <b>3D:</b> colore board aggiornato live (verde/rosso/blu/nero/bianco)<br>
+        <b>Prezzo:</b> formula mock si aggiorna ad ogni cambio campo<br>
+        <b>Validazione:</b> tutti i campi obbligatori prima di avanzare
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:28px;height:28px;background:#6366f1;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;">3</div>
+        <span style="font-weight:600;color:#1e293b;">Assembly (PCBA)</span>
+      </div>
+      <div style="font-size:11px;color:#475569;line-height:1.7;">
+        <b>Toggle:</b> PCBA sì/no — se no, salta a Step 6<br>
+        <b>Campi:</b> Tipo (Economic/Standard), Lato (Top/Bottom/Entrambi), Qty PCBA, Fori tooling, Parts Selection<br>
+        <b>Avanzate (collapsible):</b> Bake, Pulizia, Stencil, Flying Probe, Conformal Coating, Imballaggio<br>
+        <b>3D:</b> nessun componente ancora (BOM non caricata)<br>
+        <b>Prezzo:</b> costo assembly aggiunto al breakdown
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:28px;height:28px;background:#6366f1;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;">4</div>
+        <span style="font-weight:600;color:#1e293b;">BOM + CPL Upload</span>
+      </div>
+      <div style="font-size:11px;color:#475569;line-height:1.7;">
+        <b>Input:</b> BOM (XLSX/CSV) + CPL/Pick&Place (CSV)<br>
+        <b>BOM parser:</b> colonne Comment, Designator, Footprint, Qty, Populate<br>
+        <b>CPL parser:</b> header Altium skip, unità mil→mm, colonne Designator/Layer/X/Y/Rotation<br>
+        <b>DNP:</b> componenti con Populate=DNP evidenziati in giallo<br>
+        <b>3D:</b> componenti appaiono sulla board come box colorati per tipo
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:28px;height:28px;background:#6366f1;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;">5</div>
+        <span style="font-weight:600;color:#1e293b;">Review Parti</span>
+      </div>
+      <div style="font-size:11px;color:#475569;line-height:1.7;">
+        <b>Tabella:</b> Designator, Comment, Footprint, Qty, Populate, Stato<br>
+        <b>Filtri:</b> Tutti / Top / Bottom / DNP<br>
+        <b>Totale componenti:</b> conteggio e riepilogo per tipo<br>
+        <b>3D:</b> click su riga → evidenzia componente nel viewer<br>
+        <b>Mock:</b> stato sempre "Confermato" (nessun matching reale senza backend)
+      </div>
+    </div>
+
+    <!-- Step 6 -->
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:28px;height:28px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;">6</div>
+        <span style="font-weight:600;color:#1e293b;">Quote & Ordine</span>
+      </div>
+      <div style="font-size:11px;color:#475569;line-height:1.7;">
+        <b>Breakdown:</b> PCB price, Engineering fee, Assembly, Stencil, Componenti, SMT Assembly<br>
+        <b>Build time:</b> PCB 2gg + Assembly 2-3gg<br>
+        <b>CTA:</b> "Salva preventivo" (download PDF mock) + "Richiedi ordine" (form contatto)<br>
+        <b>3D:</b> preview finale in sidebar<br>
+        <b>LocalStorage:</b> draft salvato automaticamente
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <h3>PCBViewer3D — comportamento Three.js</h3>
+  <div style="background:#1e293b;border-radius:8px;padding:16px;font-size:11px;color:#94a3b8;line-height:1.8;">
+    <span style="color:#7dd3fc;">Board:</span> BoxGeometry(width, 1.6mm, height) — colore dal solder mask scelto<br>
+    <span style="color:#7dd3fc;">Texture top:</span> SVG da @tracespace/render applicato come CanvasTexture<br>
+    <span style="color:#7dd3fc;">Texture bottom:</span> SVG layer GBL, visibile con flip Bottom button<br>
+    <span style="color:#7dd3fc;">Componenti SMD:</span> BoxGeometry per ogni CPL row, Y-offset su lato corretto<br>
+    <span style="color:#7dd3fc;">Colori componenti:</span> IC=nero, RES=beige, CAP=giallo, LED=rosso/verde, altri=grigio<br>
+    <span style="color:#7dd3fc;">Interazione:</span> OrbitControls (rotate/zoom/pan) + pulsanti Top/Bottom flip<br>
+    <span style="color:#7dd3fc;">Highlight:</span> componente selezionato da tabella Step5 → emissive giallo<br>
+    <span style="color:#7dd3fc;">Performance:</span> componenti raggruppati con InstancedMesh se >200 pezzi
+  </div>
+</div>
+
+<p style="margin-top:16px;color:#6366f1;font-weight:600;text-align:center;">✓ Step e 3D viewer ok? Rispondi nel terminale.</p>
