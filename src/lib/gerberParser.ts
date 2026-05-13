@@ -66,7 +66,15 @@ export async function parseGerberZip(zipFile: File): Promise<GerberMeta> {
 
   // pcb-stackup v4 API: Array<{ filename, gerber: string }>
   const layers = Object.entries(fileMap).map(([filename, gerber]) => ({ filename, gerber }))
-  const stackup = await pcbStackup(layers)
+  const stackup = await pcbStackup(layers, {
+    color: {
+      cu:  '#b87333',              // visible copper brown for traces
+      cf:  '#d4a520',              // golden for HASL/ENIG finished pads
+      sm:  'rgba(0,80,0,0.55)',    // solder mask — reduced opacity exposes traces
+      fr4: '#4a3c28',              // realistic FR4 substrate
+      ss:  '#ffffff',              // silkscreen
+    },
+  })
 
   const layerCount = detectLayerCount(filenames)
 

@@ -105,14 +105,12 @@ function buildBoardShape(meta: GerberMeta): THREE.Shape {
 
   if (meta.outlinePoints && meta.outlinePoints.length >= 3) {
     const pts = meta.outlinePoints
-    // Shape XY: shapeX = (gerberX - cx)*SCALE, shapeY = (gerberY - cy)*SCALE
-    // After geo.rotateX(-π/2): shapeY → Three.js -Z → matches component pz
-    shape.moveTo((pts[0][0] - cx) * SCALE, (pts[0][1] - cy) * SCALE)
+    // Negate Y so after geo.rotateX(+π/2) the board Z matches component pz = -(gY-cy)*SCALE
+    shape.moveTo((pts[0][0] - cx) * SCALE, -(pts[0][1] - cy) * SCALE)
     for (let i = 1; i < pts.length; i++) {
-      shape.lineTo((pts[i][0] - cx) * SCALE, (pts[i][1] - cy) * SCALE)
+      shape.lineTo((pts[i][0] - cx) * SCALE, -(pts[i][1] - cy) * SCALE)
     }
   } else {
-    // Fallback rectangle
     const hw = (meta.width / 2) * SCALE
     const hh = (meta.height / 2) * SCALE
     shape.moveTo(-hw, -hh)
@@ -139,8 +137,9 @@ function Board({ meta, solderMaskColor, showBottom }: BoardProps) {
   const geometry = useMemo(() => {
     const shape = buildBoardShape(meta)
     const geo = new THREE.ExtrudeGeometry(shape, { depth: BOARD_THICKNESS, bevelEnabled: false })
-    // Lay flat: shape XY → XZ plane; extrusion +Z → +Y (board thickness)
-    geo.rotateX(-Math.PI / 2)
+    // Lay flat: rotateX(+π/2) maps front face normal to +Y (visible from above)
+    // and extrusion direction to -Y, so front face ends at y=+BOARD_THICKNESS/2 after center()
+    geo.rotateX(Math.PI / 2)
     geo.center()
     return geo
   }, [meta])
@@ -163,10 +162,11 @@ function Board({ meta, solderMaskColor, showBottom }: BoardProps) {
   return (
     <mesh geometry={geometry} rotation-x={showBottom ? Math.PI : 0}>
       <meshStandardMaterial
-        color={boardColor}
+        color={texture ? '#ffffff' : boardColor}
         map={texture ?? null}
         roughness={0.85}
         metalness={0.0}
+        side={THREE.DoubleSide}
       />
     </mesh>
   )
