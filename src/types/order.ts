@@ -13,6 +13,7 @@ export interface GerberMeta {
   height: number  // mm
   originX: number // mm — left edge of board in design space
   originY: number // mm — bottom edge of board in design space
+  outlinePoints?: [number, number][]  // mm — closed polygon from outline layer (GM/GKO)
   layerSVGs: {
     top: string
     bottom: string

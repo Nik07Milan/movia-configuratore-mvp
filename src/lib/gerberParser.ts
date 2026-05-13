@@ -6,6 +6,36 @@ import type { GerberMeta } from '../types/order'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const pcbStackup: typeof pcbStackupModule = (pcbStackupModule as any).default ?? pcbStackupModule
 
+/**
+ * Parse a gerber outline layer (GM/GKO) into a closed polygon.
+ * Returns null if arcs (G02/G03) are present — caller falls back to bounding box.
+ * Handles modal coordinates (X-only or Y-only lines).
+ */
+export function parseOutlineGerber(content: string): [number, number][] | null {
+  if (/^G0[23]/m.test(content)) return null  // arcs not supported
+
+  const fmtMatch = content.match(/%FSLAX\d(\d)Y\d\d\*%/)
+  const decimals = fmtMatch ? parseInt(fmtMatch[1]) : 4
+  const divisor = Math.pow(10, decimals)
+  const toMm = /MOMM/.test(content) ? 1 : 25.4
+
+  const points: [number, number][] = []
+  let curX = 0
+  let curY = 0
+
+  for (const line of content.split('\n')) {
+    const dm = line.match(/D0([12])\*/)
+    if (!dm) continue
+    const xm = line.match(/X(-?\d+)/)
+    const ym = line.match(/Y(-?\d+)/)
+    if (xm) curX = (parseInt(xm[1]) / divisor) * toMm
+    if (ym) curY = (parseInt(ym[1]) / divisor) * toMm
+    if (dm[1] === '1') points.push([curX, curY])
+  }
+
+  return points.length >= 3 ? points : null
+}
+
 /** Pure function — testable without file I/O */
 export function detectLayerCount(filenames: string[]): number {
   const innerLayers = filenames.filter((f) => /\.G[0-9]+$/i.test(f)).length
@@ -29,6 +59,10 @@ export async function parseGerberZip(zipFile: File): Promise<GerberMeta> {
   if (!hasTop) {
     throw new Error(`ZIP non valido: nessun file .GTL trovato. File presenti: ${filenames.join(', ')}`)
   }
+
+  // Parse board outline from GM/GKO layer (optional — falls back to bounding box)
+  const outlineFilename = filenames.find((f) => /\.(GM|GKO|GML|GM1|GM2)$/i.test(f))
+  const outlinePoints = outlineFilename ? parseOutlineGerber(fileMap[outlineFilename]) ?? undefined : undefined
 
   // pcb-stackup v4 API: Array<{ filename, gerber: string }>
   const layers = Object.entries(fileMap).map(([filename, gerber]) => ({ filename, gerber }))
@@ -54,6 +88,7 @@ export async function parseGerberZip(zipFile: File): Promise<GerberMeta> {
     height,
     originX,
     originY,
+    outlinePoints,
     layerSVGs: {
       top: stackup.top.svg,
       bottom: stackup.bottom.svg,
