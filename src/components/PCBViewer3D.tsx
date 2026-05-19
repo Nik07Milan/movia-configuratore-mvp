@@ -4,6 +4,101 @@ import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import type { GerberMeta, CPLItem } from '../types/order'
 
+// ─── SVG → CanvasTexture ─────────────────────────────────────────────────────
+
+async function svgToTexture(
+  svgString: string,
+  boardWidthMm: number,
+  boardHeightMm: number,
+  maxPx = 2048,
+  flipX = false,
+): Promise<THREE.CanvasTexture | null> {
+  if (!svgString) return null
+  try {
+    const aspect = boardWidthMm / (boardHeightMm || boardWidthMm || 1)
+    const w = aspect >= 1 ? maxPx : Math.round(maxPx * aspect)
+    const h = aspect >= 1 ? Math.round(maxPx / aspect) : maxPx
+
+    // Patch explicit px dimensions onto the <svg> root element.
+    // SVGs with mm/in units produce naturalWidth=0 in Chrome off-screen <img>
+    // elements, causing drawImage to silently produce a blank canvas.
+    let svg = svgString
+    if (/(<svg\b[^>]*)\bwidth="[^"]*"/.test(svg))
+      svg = svg.replace(/(<svg\b[^>]*)\bwidth="[^"]*"/, `$1width="${w}px"`)
+    else
+      svg = svg.replace(/(<svg\b)/, `$1 width="${w}px"`)
+    if (/(<svg\b[^>]*)\bheight="[^"]*"/.test(svg))
+      svg = svg.replace(/(<svg\b[^>]*)\bheight="[^"]*"/, `$1height="${h}px"`)
+    else
+      svg = svg.replace(/(<svg\b)/, `$1 height="${h}px"`)
+
+    const blob = new Blob([svg], { type: 'image/svg+xml' })
+    const url = URL.createObjectURL(blob)
+
+    // Use <img>+blobURL — supports the full DOM SVG renderer (xlink:href, <use>, <defs>)
+    // which pcb-stackup requires. createImageBitmap uses a restricted decoder that rejects
+    // complex SVGs with InvalidStateError.
+    const img = new Image()
+    await new Promise<void>((res, rej) => {
+      img.onload = () => res()
+      img.onerror = rej
+      img.src = url
+    })
+    const canvas = document.createElement('canvas')
+    canvas.width = w
+    canvas.height = h
+    const ctx = canvas.getContext('2d')!
+
+    // White background before drawImage so semi-transparent SVG layers (solder mask
+    // at ~75% opacity) composite correctly. Without this, the canvas stores
+    // premultiplied-alpha values that Three.js reads as too-dark / gray.
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, w, h)
+    if (flipX) {
+      // pcb-stackup bottom SVG is X-mirrored (rendered from below).
+      // Flip canvas horizontally so the pixel data matches the same
+      // UV coordinate space as the top texture (u=0 = Gerber minX).
+      ctx.save()
+      ctx.translate(w, 0)
+      ctx.scale(-1, 1)
+      ctx.drawImage(img, 0, 0, w, h)
+      ctx.restore()
+    } else {
+      ctx.drawImage(img, 0, 0, w, h)
+    }
+    URL.revokeObjectURL(url)
+
+    return new THREE.CanvasTexture(canvas)
+  } catch {
+    return null
+  }
+}
+
+// ─── Board outline → THREE.Shape ─────────────────────────────────────────────
+
+function buildBoardShape(meta: GerberMeta): THREE.Shape {
+  const shape = new THREE.Shape()
+  const cx = meta.originX + meta.width / 2
+  const cy = meta.originY + meta.height / 2
+
+  if (meta.outlinePoints && meta.outlinePoints.length >= 3) {
+    const pts = meta.outlinePoints
+    shape.moveTo((pts[0][0] - cx) * SCALE, -(pts[0][1] - cy) * SCALE)
+    for (let i = 1; i < pts.length; i++) {
+      shape.lineTo((pts[i][0] - cx) * SCALE, -(pts[i][1] - cy) * SCALE)
+    }
+  } else {
+    const hw = (meta.width / 2) * SCALE
+    const hh = (meta.height / 2) * SCALE
+    shape.moveTo(-hw, -hh)
+    shape.lineTo(hw, -hh)
+    shape.lineTo(hw, hh)
+    shape.lineTo(-hw, hh)
+  }
+  shape.closePath()
+  return shape
+}
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const SCALE = 0.01            // mm → Three.js units
@@ -67,61 +162,6 @@ function getComponentMaterial(designator: string): { color: string; roughness: n
   return { color: '#888888', roughness: 0.7, metalness: 0.0 }
 }
 
-// ─── SVG → CanvasTexture (2048px max) ────────────────────────────────────────
-
-async function svgToTexture(svgString: string, maxPx = 2048): Promise<THREE.CanvasTexture | null> {
-  if (!svgString) return null
-  try {
-    const blob = new Blob([svgString], { type: 'image/svg+xml' })
-    const url = URL.createObjectURL(blob)
-    const img = new Image()
-    await new Promise<void>((res, rej) => {
-      img.onload = () => res()
-      img.onerror = rej
-      img.src = url
-    })
-    const nw = img.naturalWidth || 512
-    const nh = img.naturalHeight || 512
-    const aspect = nw / nh
-    const w = aspect >= 1 ? maxPx : Math.round(maxPx * aspect)
-    const h = aspect >= 1 ? Math.round(maxPx / aspect) : maxPx
-    const canvas = document.createElement('canvas')
-    canvas.width = w
-    canvas.height = h
-    canvas.getContext('2d')!.drawImage(img, 0, 0, w, h)
-    URL.revokeObjectURL(url)
-    return new THREE.CanvasTexture(canvas)
-  } catch {
-    return null
-  }
-}
-
-// ─── Board outline → THREE.Shape ─────────────────────────────────────────────
-
-function buildBoardShape(meta: GerberMeta): THREE.Shape {
-  const shape = new THREE.Shape()
-  const cx = meta.originX + meta.width / 2
-  const cy = meta.originY + meta.height / 2
-
-  if (meta.outlinePoints && meta.outlinePoints.length >= 3) {
-    const pts = meta.outlinePoints
-    // Negate Y so after geo.rotateX(+π/2) the board Z matches component pz = -(gY-cy)*SCALE
-    shape.moveTo((pts[0][0] - cx) * SCALE, -(pts[0][1] - cy) * SCALE)
-    for (let i = 1; i < pts.length; i++) {
-      shape.lineTo((pts[i][0] - cx) * SCALE, -(pts[i][1] - cy) * SCALE)
-    }
-  } else {
-    const hw = (meta.width / 2) * SCALE
-    const hh = (meta.height / 2) * SCALE
-    shape.moveTo(-hw, -hh)
-    shape.lineTo(hw, -hh)
-    shape.lineTo(hw, hh)
-    shape.lineTo(-hw, hh)
-  }
-  shape.closePath()
-  return shape
-}
-
 // ─── Board mesh ───────────────────────────────────────────────────────────────
 
 interface BoardProps {
@@ -133,12 +173,40 @@ interface BoardProps {
 function Board({ meta, solderMaskColor, showBottom }: BoardProps) {
   const [topTexture, setTopTexture] = useState<THREE.CanvasTexture | null>(null)
   const [bottomTexture, setBottomTexture] = useState<THREE.CanvasTexture | null>(null)
+  const matRef = useRef<THREE.MeshStandardMaterial>(null)
 
   const geometry = useMemo(() => {
     const shape = buildBoardShape(meta)
-    const geo = new THREE.ExtrudeGeometry(shape, { depth: BOARD_THICKNESS, bevelEnabled: false })
-    // Lay flat: rotateX(+π/2) maps front face normal to +Y (visible from above)
-    // and extrusion direction to -Y, so front face ends at y=+BOARD_THICKNESS/2 after center()
+
+    // UV bounds must match the texture coordinate space exactly.
+    // The texture is rendered from the pcb-stackup viewBox (meta.width × meta.height).
+    // Using outline bounding box would diverge if copper/silkscreen extends past the
+    // outline, creating a systematic position mismatch. Always use viewBox dimensions.
+    const hw = (meta.width  / 2) * SCALE  // half-width in Three.js units
+    const hh = (meta.height / 2) * SCALE  // half-height
+
+    const geo = new THREE.ExtrudeGeometry(shape, {
+      depth: BOARD_THICKNESS,
+      bevelEnabled: false,
+      UVGenerator: {
+        generateTopUV: (_geo, vertices, idxA, idxB, idxC) => {
+          // shape_x ∈ [-hw, +hw] → u ∈ [0, 1]  (u=0 = Gerber minX)
+          // shape_y ∈ [-hh, +hh] → v ∈ [0, 1]
+          // THREE.CanvasTexture has flipY=true: UV v=0 → canvas bottom → Gerber minY.
+          // shape_y = -(gerberY-cy)*SCALE, so v = (hh-shape_y)/(2*hh) = (gerberY-originY)/height
+          // gives v=0 at Gerber minY and v=1 at Gerber maxY — matching flipY convention.
+          const uv = (vi: number) => new THREE.Vector2(
+            (vertices[vi * 3]     + hw) / (2 * hw),
+            (hh - vertices[vi * 3 + 1]) / (2 * hh),
+          )
+          return [uv(idxA), uv(idxB), uv(idxC)]
+        },
+        generateSideWallUV: () => [
+          new THREE.Vector2(0, 0), new THREE.Vector2(0, 1),
+          new THREE.Vector2(1, 1), new THREE.Vector2(1, 0),
+        ],
+      },
+    })
     geo.rotateX(Math.PI / 2)
     geo.center()
     return geo
@@ -146,8 +214,10 @@ function Board({ meta, solderMaskColor, showBottom }: BoardProps) {
 
   useEffect(() => {
     let cancelled = false
-    svgToTexture(meta.layerSVGs.top).then((t) => { if (!cancelled) setTopTexture(t) })
-    svgToTexture(meta.layerSVGs.bottom).then((t) => { if (!cancelled) setBottomTexture(t) })
+    svgToTexture(meta.layerSVGs.top, meta.width, meta.height)
+      .then((t) => { if (!cancelled) setTopTexture(t) })
+    svgToTexture(meta.layerSVGs.bottom, meta.width, meta.height, 2048, true)
+      .then((t) => { if (!cancelled) setBottomTexture(t) })
     return () => {
       cancelled = true
       topTexture?.dispose()
@@ -159,11 +229,18 @@ function Board({ meta, solderMaskColor, showBottom }: BoardProps) {
   const boardColor = SOLDER_MASK_COLORS[solderMaskColor] ?? '#1a5c1a'
   const texture = showBottom ? bottomTexture : topTexture
 
+  // r3f doesn't always call material.needsUpdate when map changes null→texture
+  // (shader recompile required). Trigger it explicitly via ref.
+  useEffect(() => {
+    if (matRef.current) matRef.current.needsUpdate = true
+  }, [texture])
+
   return (
     <mesh geometry={geometry} rotation-x={showBottom ? Math.PI : 0}>
       <meshStandardMaterial
+        ref={matRef}
         color={texture ? '#ffffff' : boardColor}
-        map={texture ?? null}
+        map={texture ?? undefined}
         roughness={0.85}
         metalness={0.0}
         side={THREE.DoubleSide}
@@ -194,10 +271,10 @@ function Components({ cpl, selectedDesignator, showBottom, meta }: ComponentsPro
         const [l, w, h] = getComponentSize(item.footprint, item.designator)
         const compH = h * SCALE
         const yOffset = BOARD_THICKNESS / 2 + compH / 2
-        const y = isBottom ? -yOffset : yOffset
+        const y = yOffset  // always above the visible face (board flips, components don't)
 
         const px = (item.x - cx) * SCALE
-        const pz = -(item.y - cy) * SCALE
+        const pz = (showBottom ? 1 : -1) * (item.y - cy) * SCALE
 
         const isSelected = item.designator === selectedDesignator
         const mat = getComponentMaterial(item.designator)

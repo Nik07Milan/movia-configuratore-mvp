@@ -116,7 +116,9 @@ export const useOrderStore = create<OrderStore>()(
       // File objects cannot be serialized — exclude them
       partialize: (s) => ({
         currentStep: s.currentStep,
-        gerberMeta: s.gerberMeta,
+        // Strip SVG strings — they're regenerated on upload and can be 500KB+.
+        // Persisting them fills localStorage and causes stale texture on re-upload.
+        gerberMeta: s.gerberMeta ? { ...s.gerberMeta, layerSVGs: { top: '', bottom: '' } } : null,
         pcbConfig: s.pcbConfig,
         assemblyEnabled: s.assemblyEnabled,
         assemblyConfig: s.assemblyConfig,

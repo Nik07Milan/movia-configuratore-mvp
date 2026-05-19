@@ -71,11 +71,11 @@ export function Step2_PCBConfig() {
         </Field>
 
         <Field label="Larghezza (mm)">
-          <input type="number" step="0.1" {...register('width', { required: true, valueAsNumber: true })} className={INPUT} />
+          <input type="number" step="any" {...register('width', { required: true, valueAsNumber: true })} className={INPUT} />
         </Field>
 
         <Field label="Altezza (mm)">
-          <input type="number" step="0.1" {...register('height', { required: true, valueAsNumber: true })} className={INPUT} />
+          <input type="number" step="any" {...register('height', { required: true, valueAsNumber: true })} className={INPUT} />
         </Field>
 
         <Field label="Quantità PCB">
@@ -92,7 +92,7 @@ export function Step2_PCBConfig() {
           <p className="text-xs text-slate-400 uppercase tracking-widest mb-3">Specifiche avanzate</p>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Spessore (mm)">
-              <input type="number" step="0.1" {...register('thickness', { valueAsNumber: true })} className={INPUT} />
+              <input type="number" step="any" {...register('thickness', { valueAsNumber: true })} className={INPUT} />
             </Field>
             <Field label="Finitura superficiale">
               <select {...register('surfaceFinish')} className={INPUT}>
